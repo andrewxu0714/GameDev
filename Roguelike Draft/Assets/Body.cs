@@ -21,11 +21,12 @@ public class Body : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		translate = new Vector3 (0, 0, 0);
+		
 	}
 
 	void FixedUpdate() {
 		bodyRigidbody.MovePosition (transform.position + translate);
+		translate = new Vector3 (0, 0, 0);
 	}
 
 	public bool CanAct() {

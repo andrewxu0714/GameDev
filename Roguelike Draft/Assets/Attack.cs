@@ -18,8 +18,7 @@ public class Attack : MonoBehaviour {
 	private int attackBuffer=0;
 	private int comboCount=0; //represents the stats of the NEXT attack
 
-	private float inputDuration=0.2f;
-	private float inputDelay=0f;
+	private float prevFire = 0f;
 
 	// Use this for initialization
 	void Start () {
@@ -29,16 +28,15 @@ public class Attack : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		inputDelay = Mathf.Max (inputDelay - Time.deltaTime, 0);
-
-		if (Input.GetAxis ("Fire1") > 0 && inputDelay <= 0 && (bodyScript.CanAct () || bodyScript.state == Body.statelist.attacking)) {
+		if (Input.GetAxis ("Fire1") > 0 && prevFire == 0 && (bodyScript.CanAct () || bodyScript.state == Body.statelist.attacking)) {
 			attackBuffer = Mathf.Min (combo - comboCount, attackBuffer + 1);
-			inputDelay = inputDelay + inputDuration;
 		}
 
 		if (attackBuffer > 0 && bodyScript.CanAct()) {
 			StartCoroutine (Strike(comboDamage[comboCount],comboDuration[comboCount],comboActiveStart[comboCount],comboActiveDuration[comboCount],comboStunDuration[comboCount],comboAllDirection[comboCount],comboCol[comboCount]));
 		}
+
+		prevFire = Input.GetAxis ("Fire1");
 	}
 		
 	IEnumerator Strike(float attackDamage, float attackDuration, float attackActiveStart, float attackActiveDuration, float attackStunDuration, bool attackAllDirection, GameObject attackCol) {
@@ -54,24 +52,30 @@ public class Attack : MonoBehaviour {
 		bool active = false;
 		while (attackDelay < attackDuration) {
 			if (bodyScript.state == Body.statelist.attacking) {
-				if (attackBuffer > 0 && comboCount <= combo && attackDelay > attackActiveStart + attackActiveDuration) {
-					StartCoroutine (Strike(comboDamage[comboCount],comboDuration[comboCount],comboActiveStart[comboCount],comboActiveDuration[comboCount],comboStunDuration[comboCount],comboAllDirection[comboCount],comboCol[comboCount]));
+				if (attackBuffer > 0 && comboCount < combo && attackDelay > attackActiveStart + attackActiveDuration) {
+					StartCoroutine (Strike (comboDamage [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
 					yield break;
 				} else {
-					attackDelay = attackDelay + Time.deltaTime;
-					if (attackDelay > attackActiveStart && active == false) {
-						active = true;
-						GameObject temp = Instantiate (attackCol, this.transform);
-						foreach (var i in temp.GetComponentsInChildren<AttackCollider> ()) {
-							i.attackDamage = attackDamage;
-							i.attackActiveDuration = attackActiveDuration;
-							i.attackStunDuration = attackStunDuration;
-							i.attackAllDirection = attackAllDirection;
-							i.attackSource = this.gameObject;
+					if (Input.GetAxis ("Fire1") > 0 && comboCount < combo && attackDelay > attackActiveStart + attackActiveDuration) {
+						attackBuffer = attackBuffer + 1;
+						StartCoroutine (Strike (comboDamage [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
+						yield break;
+					} else {
+						attackDelay = attackDelay + Time.deltaTime;
+						if (attackDelay > attackActiveStart && active == false) {
+							active = true;
+							GameObject temp = Instantiate (attackCol, this.transform);
+							foreach (var i in temp.GetComponentsInChildren<AttackCollider> ()) {
+								i.attackDamage = attackDamage;
+								i.attackActiveDuration = attackActiveDuration;
+								i.attackStunDuration = attackStunDuration;
+								i.attackAllDirection = attackAllDirection;
+								i.attackSource = this.gameObject;
+							}
+							temp.transform.rotation = Quaternion.AngleAxis (Mathf.Rad2Deg * bodyScript.direction, Vector3.down);
 						}
-						temp.transform.rotation = Quaternion.AngleAxis (Mathf.Rad2Deg * bodyScript.direction, Vector3.down);
+						yield return null;
 					}
-					yield return null;
 				}
 			} else {
 				comboCount = 0;
