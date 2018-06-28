@@ -5,6 +5,10 @@ using UnityEngine;
 public class AttackCollider : MonoBehaviour {
 
 	public float attackDamage;
+	public float knockbackIntensity;
+	public float knockbackDecay;
+	public float knockbackLimit;
+	public bool knockbackGrounded;
 	public float attackActiveDuration;
 	public float attackStunDuration;
 	public bool attackAllDirection;
@@ -29,17 +33,14 @@ public class AttackCollider : MonoBehaviour {
 	}
 
 	void Damage (GameObject target) {
-		if (target == attackSource) {
-			return;
-		}
-		if (attackHistory.Contains (target)) {
+		if (target == attackSource || attackHistory.Contains (target) || !target.GetComponent<Body> ().IsVulnerable()) {
 			return;
 		}
 		attackHistory.Add (target);
 		if (attackAllDirection) {
-			target.GetComponent<Body> ().TakeDamage (this.gameObject,10f, 100f, Mathf.Atan2 (target.transform.position.z-transform.position.z, target.transform.position.x-transform.position.x), 0.5f, 0.5f);
+			target.GetComponent<Body> ().TakeDamage (this.gameObject,attackDamage, knockbackIntensity, Mathf.Atan2 (target.transform.position.z-transform.position.z, target.transform.position.x-transform.position.x), knockbackDecay, knockbackLimit, knockbackGrounded);
 		} else {
-			target.GetComponent<Body> ().TakeDamage (this.gameObject,10f, 100f, Mathf.Atan2 ((transform.rotation * Vector3.right).z, (transform.rotation * Vector3.right).x), 0.5f, 0.5f);
+			target.GetComponent<Body> ().TakeDamage (this.gameObject,attackDamage, knockbackIntensity, Mathf.Atan2 ((transform.rotation * Vector3.right).z, (transform.rotation * Vector3.right).x), knockbackDecay, knockbackLimit, knockbackGrounded);
 		}
 	}
 }

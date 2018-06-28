@@ -7,12 +7,17 @@ public class Attack : MonoBehaviour {
 	private Body bodyScript;
 
 	private int combo=5;
-	private float[] comboDamage = new float[5] {10f,5f,5f,5f,25f};
-	private float[] comboDuration = new float[5] {0.5f,0.5f,0.5f,0.5f,3f};
-	private float[] comboActiveStart = new float[5] {0.1f,0.1f,0.1f,0.1f,0.1f}; 
-	private float[] comboActiveDuration = new float[5] {0.3f,0.3f,0.3f,0.3f,0.3f};
-	private float[] comboStunDuration = new float[5] {0.5f,0.5f,0.5f,0.5f,0.5f};
-	private bool[] comboAllDirection = new bool[5] {false,false,false,false,false};
+	private float[] comboDamage = new float[5] { 10f, 5f, 5f, 5f, 25f };
+	private float[] comboMovement = new float[5] { 0.9f, 0.9f, 0.9f, 0.9f, 0.9f };
+	private float[] comboKnockbackIntensity = new float[5] { 30f, 30f, 30f, 30f, 60f };
+	private float[] comboKnockbackDecay = new float[5] { 0.5f, 0.5f, 0.5f, 0.5f, 0.9f };
+	private float[] comboKnockbackLimit = new float[5] { 0.6f, 0.6f, 0.6f, 0.6f, 1f };
+	private bool[] comboKnockbackGrounded = new bool[5] { false, false, false, false, true };
+	private float[] comboDuration = new float[5] { 0.5f, 0.5f, 0.5f, 0.5f, 1f };
+	private float[] comboActiveStart = new float[5] { 0.1f, 0.1f, 0.1f, 0.1f, 0.1f };
+	private float[] comboActiveDuration = new float[5] { 0.3f, 0.3f, 0.3f, 0.3f, 0.3f };
+	private float[] comboStunDuration = new float[5] { 0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
+	private bool[] comboAllDirection = new bool[5] { false, false, false, false, false };
 	public GameObject[] comboCol = new GameObject[5];
 
 	private int attackBuffer=0;
@@ -33,13 +38,13 @@ public class Attack : MonoBehaviour {
 		}
 
 		if (attackBuffer > 0 && bodyScript.CanAct()) {
-			StartCoroutine (Strike(comboDamage[comboCount],comboDuration[comboCount],comboActiveStart[comboCount],comboActiveDuration[comboCount],comboStunDuration[comboCount],comboAllDirection[comboCount],comboCol[comboCount]));
+			StartCoroutine (Strike (comboDamage [comboCount], comboMovement [comboCount], comboKnockbackIntensity [comboCount], comboKnockbackDecay [comboCount], comboKnockbackLimit [comboCount], comboKnockbackGrounded [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
 		}
 
 		prevFire = Input.GetAxis ("Fire1");
 	}
 		
-	IEnumerator Strike(float attackDamage, float attackDuration, float attackActiveStart, float attackActiveDuration, float attackStunDuration, bool attackAllDirection, GameObject attackCol) {
+	IEnumerator Strike(float attackDamage, float attackMovement, float knockbackIntensity, float knockbackDecay, float knockbackLimit, bool knockbackGrounded, float attackDuration, float attackActiveStart, float attackActiveDuration, float attackStunDuration, bool attackAllDirection, GameObject attackCol) {
 		bodyScript.state = Body.statelist.attacking;
 		attackBuffer = attackBuffer - 1;
 		comboCount = comboCount + 1;
@@ -53,12 +58,12 @@ public class Attack : MonoBehaviour {
 		while (attackDelay < attackDuration) {
 			if (bodyScript.state == Body.statelist.attacking) {
 				if (attackBuffer > 0 && comboCount < combo && attackDelay > attackActiveStart + attackActiveDuration) {
-					StartCoroutine (Strike (comboDamage [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
+					StartCoroutine (Strike (comboDamage [comboCount], comboMovement [comboCount], comboKnockbackIntensity [comboCount], comboKnockbackDecay [comboCount], comboKnockbackLimit [comboCount], comboKnockbackGrounded [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
 					yield break;
 				} else {
 					if (Input.GetAxis ("Fire1") > 0 && comboCount < combo && attackDelay > attackActiveStart + attackActiveDuration) {
 						attackBuffer = attackBuffer + 1;
-						StartCoroutine (Strike (comboDamage [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
+						StartCoroutine (Strike (comboDamage [comboCount], comboMovement [comboCount], comboKnockbackIntensity [comboCount], comboKnockbackDecay [comboCount], comboKnockbackLimit [comboCount], comboKnockbackGrounded [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboCol [comboCount]));
 						yield break;
 					} else {
 						attackDelay = attackDelay + Time.deltaTime;
@@ -67,12 +72,19 @@ public class Attack : MonoBehaviour {
 							GameObject temp = Instantiate (attackCol, this.transform);
 							foreach (var i in temp.GetComponentsInChildren<AttackCollider> ()) {
 								i.attackDamage = attackDamage;
+								i.knockbackIntensity = knockbackIntensity;
+								i.knockbackDecay = knockbackDecay;
+								i.knockbackLimit = knockbackLimit;
+								i.knockbackGrounded = knockbackGrounded;
 								i.attackActiveDuration = attackActiveDuration;
 								i.attackStunDuration = attackStunDuration;
 								i.attackAllDirection = attackAllDirection;
 								i.attackSource = this.gameObject;
 							}
 							temp.transform.rotation = Quaternion.AngleAxis (Mathf.Rad2Deg * bodyScript.direction, Vector3.down);
+						}
+						if (attackDelay < attackActiveStart) {
+							bodyScript.translate = attackMovement * Time.deltaTime / attackActiveStart * (Quaternion.AngleAxis (bodyScript.direction * Mathf.Rad2Deg, Vector3.down) * Vector3.right);
 						}
 						yield return null;
 					}
