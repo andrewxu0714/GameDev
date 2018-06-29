@@ -9,8 +9,8 @@ public class Attack : MonoBehaviour {
 	private int combo=5;
 	private float[] comboDamage = new float[5] { 10f, 5f, 5f, 5f, 25f };
 	private float[] comboMovement = new float[5] { 0.9f, 0.9f, 0.9f, 0.9f, 0.9f };
-	private float[] comboKnockbackIntensity = new float[5] { 30f, 30f, 30f, 30f, 60f };
-	private float[] comboKnockbackDecay = new float[5] { 0.5f, 0.5f, 0.5f, 0.5f, 0.9f };
+	private float[] comboKnockbackIntensity = new float[5] { 1f, 1f, 1f, 1f, 6f };
+	private float[] comboKnockbackDecay = new float[5] { 12f, 12f, 12f, 12f, 6f };
 	private float[] comboKnockbackLimit = new float[5] { 0.6f, 0.6f, 0.6f, 0.6f, 1f };
 	private bool[] comboKnockbackGrounded = new bool[5] { false, false, false, false, true };
 	private float[] comboDuration = new float[5] { 0.5f, 0.5f, 0.5f, 0.5f, 1f };

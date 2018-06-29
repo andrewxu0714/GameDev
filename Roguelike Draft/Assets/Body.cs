@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Body : MonoBehaviour {
 
-	public enum statelist {neutral, moving, advancedmovement, advancedmovementinvuln, attacking, casting, castingunsafe, hit, knocked, grounded, recovering, recovered};
+	public enum statelist {neutral, moving, advancedmovement, advancedmovementinvuln, attacking, casting, castingunsafe, hit, knocked, grounded, recovering};
 	public statelist state;
 
 	public Vector3 translate;
 	public float health=100f;
 	public float direction=0;
+	private bool specialInvuln = false;
 	private CharacterController bodyController;
 
 	private GameObject lastCollider;
@@ -30,11 +31,11 @@ public class Body : MonoBehaviour {
 	}
 
 	public bool CanAct() {
-		return (state == statelist.neutral || state == statelist.moving || state == statelist.casting || state == statelist.recovered);
+		return (state == statelist.neutral || state == statelist.moving || state == statelist.casting);
 	}
 
 	public bool IsVulnerable() {
-		return !(state == statelist.advancedmovementinvuln || state == statelist.grounded || state == statelist.recovering || state==statelist.recovered);
+		return !(state == statelist.advancedmovementinvuln || state == statelist.grounded || state == statelist.recovering || specialInvuln);
 	}
 
 	public void TakeDamage(GameObject damageInstance,float damage,float knockbackIntensity, float knockbackDirection, float knockbackDecay, float knockbackLimit, bool knockbackGrounded) {
@@ -50,16 +51,21 @@ public class Body : MonoBehaviour {
 		} else {
 			state = statelist.hit;
 		}
-		Vector3 knockbackVector = knockbackIntensity * (Quaternion.AngleAxis(knockbackDirection*Mathf.Rad2Deg,Vector3.down) * Vector3.right);
+		Vector3 knockbackVector = (Quaternion.AngleAxis(knockbackDirection*Mathf.Rad2Deg,Vector3.down) * Vector3.right);
 		while (knockbackDelay < knockbackLimit && damageInstance==lastCollider) {
-			translate = knockbackVector * Time.deltaTime;
 			direction = (knockbackDirection + Mathf.PI) % (Mathf.PI*2) ;
-			knockbackVector = knockbackVector * knockbackDecay;
+			float knockbackMagnitude = knockbackIntensity*(Mathf.Exp (-knockbackDelay*knockbackDecay) - Mathf.Exp (-(knockbackDelay+Time.deltaTime)*knockbackDecay));
+			knockbackVector = knockbackVector.normalized * knockbackMagnitude;
 			knockbackDelay = knockbackDelay + Time.deltaTime;
+			translate = knockbackVector;
 			yield return null;
 		}
-		if (knockbackGrounded) {
-			StartCoroutine(Ground());
+		if (damageInstance == lastCollider) {
+			if (knockbackGrounded) {
+				StartCoroutine (Ground ());
+			} else {
+				state = statelist.neutral;
+			}
 		}
 	}
 
@@ -67,11 +73,10 @@ public class Body : MonoBehaviour {
 		state = statelist.grounded;
 		yield return new WaitForSeconds (1f);
 		state = statelist.recovering;
-		yield return new WaitForSeconds (0.1f);
-		state = statelist.recovered;
 		yield return new WaitForSeconds (0.2f);
-		if (state == statelist.recovered) {
-			state = statelist.neutral;
-		}
+		state = statelist.neutral;
+		specialInvuln = true;
+		yield return new WaitForSeconds (0.5f);
+		specialInvuln = false;
 	}
 }
