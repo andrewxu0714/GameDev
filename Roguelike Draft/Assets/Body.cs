@@ -28,6 +28,7 @@ public class Body : MonoBehaviour {
 	void FixedUpdate() {
 		bodyController.Move (translate);
 		translate = new Vector3 (0, 0, 0);
+		transform.position = new Vector3 (transform.position.x, 0.5f, transform.position.z);
 	}
 
 	public bool CanAct() {
