@@ -12,6 +12,7 @@ public class AttackCollider : MonoBehaviour {
 	public float attackActiveDuration;
 	public float attackStunDuration;
 	public bool attackAllDirection;
+	public bool attackPositionTrack;
 	public GameObject attackSource;
 	private List<GameObject> attackHistory = new List<GameObject>();
 
@@ -26,6 +27,12 @@ public class AttackCollider : MonoBehaviour {
 			Destroy (this.gameObject);
 		}
 		attackActiveDuration = attackActiveDuration - Time.deltaTime;
+	}
+
+	void FixedUpdate () {
+		if (attackPositionTrack) {
+			this.transform.parent.transform.position = attackSource.transform.position;
+		}
 	}
 
 	void OnTriggerEnter(Collider other) {
