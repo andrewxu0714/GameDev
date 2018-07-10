@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LeapAttack : MonoBehaviour {
+public class LeapAttack : MonoBehaviour, IAttack {
 
 	private Body bodyScript;
 
@@ -33,7 +33,7 @@ public class LeapAttack : MonoBehaviour {
 
 	}
 
-	public void CommandAttack() {
+	public void Attack() {
 		StartCoroutine (Strike (comboDamage [comboCount], comboMovement [comboCount], comboKnockbackIntensity [comboCount], comboKnockbackDecay [comboCount], comboKnockbackLimit [comboCount], comboKnockbackGrounded [comboCount], comboDuration [comboCount], comboActiveStart [comboCount], comboActiveDuration [comboCount], comboStunDuration [comboCount], comboAllDirection [comboCount], comboPositionTrack [comboCount], comboCol [comboCount]));
 	}
 
