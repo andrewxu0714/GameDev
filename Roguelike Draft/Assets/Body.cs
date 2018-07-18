@@ -36,7 +36,7 @@ public class Body : MonoBehaviour {
 	}
 
 	public bool IsVulnerable() {
-		return !(state == statelist.advancedmovementinvuln || state == statelist.grounded || state == statelist.recovering || specialInvuln);
+		return !(state == statelist.advancedmovementinvuln || state == statelist.knocked || state == statelist.grounded || state == statelist.recovering || specialInvuln);
 	}
 
 	public void TakeDamage(GameObject damageInstance,float damage,float knockbackIntensity, float knockbackDirection, float knockbackDecay, float knockbackLimit, bool knockbackGrounded) {

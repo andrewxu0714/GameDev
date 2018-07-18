@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class TerrainManagement : MonoBehaviour {
 
+	public GameObject wall;
 	public enum terrainType {grass, rock};
 	public enum featureType {plains, mountain, obstruction};
 	public GameObject terrainTile;
@@ -17,6 +18,7 @@ public class TerrainManagement : MonoBehaviour {
 		terrainMap = terrainGeneration (32, 32);
 		featureMap = featureGeneration (32, 32);
 		spawnTerrain (terrainMap, featureMap);
+		spawnWalls ();
 	}
 	
 	// Update is called once per frame
@@ -38,7 +40,7 @@ public class TerrainManagement : MonoBehaviour {
 		featureType[,] tempMap = new featureType[length,width];
 		for (int i = 0; i<tempMap.GetLength(0); i++) {
 			for (int j = 0; j < tempMap.GetLength (1); j++) {
-				if (Random.value > 0.9) {
+				if (Random.value > 0.95) {
 					tempMap [i, j] = featureType.obstruction;
 				} else {
 					tempMap [i, j] = featureType.plains;
@@ -57,5 +59,12 @@ public class TerrainManagement : MonoBehaviour {
 				temp.GetComponent<TileManagement> ().terrainManager = this;
 			}
 		}
+	}
+
+	private void spawnWalls() {
+		Instantiate (wall, new Vector3 (15.5f, 0.5f, -1f), Quaternion.identity);
+		Instantiate (wall, new Vector3 (15.5f, 0.5f, 32f), Quaternion.identity);
+		Instantiate (wall, new Vector3 (-1f, 0.5f, 15.5f), Quaternion.AngleAxis (90f, Vector3.down));
+		Instantiate (wall, new Vector3 (32f, 0.5f, 15.5f), Quaternion.AngleAxis (90f, Vector3.down));
 	}
 }

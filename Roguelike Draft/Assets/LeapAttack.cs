@@ -13,9 +13,9 @@ public class LeapAttack : MonoBehaviour, IAttack {
 	private float[] comboKnockbackDecay = new float[1] { 2f };
 	private float[] comboKnockbackLimit = new float[1] { 1f };
 	private bool[] comboKnockbackGrounded = new bool[1] { true };
-	private float[] comboDuration = new float[1] { 0.1f };
-	private float[] comboActiveStart = new float[1] { 0.01f };
-	private float[] comboActiveDuration = new float[1] { 0.09f };
+	private float[] comboDuration = new float[1] { 0.5f };
+	private float[] comboActiveStart = new float[1] { 0.2f };
+	private float[] comboActiveDuration = new float[1] { 0.1f };
 	private float[] comboStunDuration = new float[1] { 1f };
 	private bool[] comboAllDirection = new bool[1] { false };
 	private bool[] comboPositionTrack = new bool[1] { true };
@@ -62,7 +62,9 @@ public class LeapAttack : MonoBehaviour, IAttack {
 						i.attackSource = this.gameObject;
 					}
 				}
-				bodyScript.translate = attackMovement * Time.deltaTime / attackDuration * (Quaternion.AngleAxis (bodyScript.direction * Mathf.Rad2Deg, Vector3.down) * Vector3.right);
+				if (attackDelay < attackActiveStart + attackActiveDuration && attackDelay > attackActiveStart) {
+					bodyScript.translate = attackMovement * Time.deltaTime / (attackActiveDuration) * (Quaternion.AngleAxis (bodyScript.direction * Mathf.Rad2Deg, Vector3.down) * Vector3.right);
+				}
 				yield return null;
 			} else {
 				comboCount = 0;
